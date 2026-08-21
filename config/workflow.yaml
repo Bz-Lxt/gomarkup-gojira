@@ -1,0 +1,125 @@
+# GoJira 双工作流声明。启动时完整性校验失败则拒绝启动。
+# Guard / Action 名称必须在 Go 编译期注册表中存在。
+
+version: 1
+
+roles:
+  - ADMIN
+  - PM
+  - DEV
+  - QA
+  - VIEWER
+
+columns:
+  - id: TODO
+    label: 待处理
+  - id: IN_PROGRESS
+    label: 开发中
+  - id: TESTING
+    label: 已测试
+    hint: 测试验证中
+  - id: DONE
+    label: 已完成
+
+workflows:
+  task_workflow:
+    applies_to: [STORY, TASK]
+    initial: TODO
+    states:
+      TODO:
+        column: TODO
+        terminal: false
+      IN_PROGRESS:
+        column: IN_PROGRESS
+        terminal: false
+      TESTING:
+        column: TESTING
+        terminal: false
+      DONE:
+        column: DONE
+        terminal: true
+    transitions:
+      - from: TODO
+        to: IN_PROGRESS
+        allowed_roles: [DEV, PM, ADMIN]
+        guards: [has_assignee]
+      - from: IN_PROGRESS
+        to: TESTING
+        allowed_roles: [DEV, QA, ADMIN]
+      - from: TESTING
+        to: DONE
+        allowed_roles: [QA, ADMIN]
+      - from: IN_PROGRESS
+        to: TODO
+        allowed_roles: [PM, ADMIN]
+      - from: TESTING
+        to: IN_PROGRESS
+        allowed_roles: [QA, ADMIN]
+      - from: DONE
+        to: TESTING
+        allowed_roles: [PM, ADMIN]
+
+  bug_workflow:
+    applies_to: [BUG]
+    initial: NEW
+    states:
+      NEW:
+        column: TODO
+        terminal: false
+      CONFIRMED:
+        column: TODO
+        terminal: false
+      FIXING:
+        column: IN_PROGRESS
+        terminal: false
+      FIXED:
+        column: TESTING
+        terminal: false
+      RESOLVED:
+        column: DONE
+        terminal: false
+      CLOSED:
+        column: DONE
+        terminal: true
+      REJECTED:
+        column: DONE
+        terminal: true
+      REOPENED:
+        column: IN_PROGRESS
+        terminal: false
+    transitions:
+      - from: NEW
+        to: CONFIRMED
+        allowed_roles: [QA, PM, ADMIN]
+      - from: NEW
+        to: REJECTED
+        allowed_roles: [QA, PM]
+      - from: CONFIRMED
+        to: FIXING
+        allowed_roles: [DEV, ADMIN]
+        guards: [has_assignee]
+      - from: FIXING
+        to: FIXED
+        allowed_roles: [DEV, ADMIN]
+      - from: FIXED
+        to: RESOLVED
+        allowed_roles: [QA]   # Prompt 硬约束：ADMIN 亦不例外
+      - from: FIXED
+        to: FIXING
+        allowed_roles: [QA]
+      - from: RESOLVED
+        to: CLOSED
+        allowed_roles: [PM, QA, ADMIN]
+      - from: CLOSED
+        to: REOPENED
+        allowed_roles: [QA, PM, ADMIN]
+      - from: REJECTED
+        to: REOPENED
+        allowed_roles: [QA, PM, ADMIN]
+      - from: REOPENED
+        to: FIXING
+        allowed_roles: [DEV, ADMIN]
+        guards: [has_assignee]
+      - from: REOPENED
+        to: FIXED
+        allowed_roles: [DEV, ADMIN]
