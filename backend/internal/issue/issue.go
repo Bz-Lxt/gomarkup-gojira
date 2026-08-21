@@ -174,9 +174,12 @@ func (s *Service) List(w http.ResponseWriter, r *http.Request) {
 		n++
 	}
 	clause := strings.Join(where, " AND ")
-	args = append(args, per, offset)
 	var total int64
-	_ = s.DB.Get(&total, `SELECT COUNT(*) FROM issues i WHERE `+clause, args...)
+	if err := s.DB.Get(&total, `SELECT COUNT(*) FROM issues i WHERE `+clause, args...); err != nil {
+		platform.WriteError(w, r, domain.Internal(err))
+		return
+	}
+	args = append(args, per, offset)
 	var rows []domain.Issue
 	err := s.DB.Select(&rows, issueSelect+` WHERE `+clause+` ORDER BY i.board_rank, i.id LIMIT $`+itoa(n)+` OFFSET $`+itoa(n+1), args...)
 	if err != nil {
