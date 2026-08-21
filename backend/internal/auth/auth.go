@@ -4,7 +4,6 @@ import (
 	"context"
 	"net/http"
 	"strings"
-	"sync"
 	"time"
 	"unicode"
 
@@ -22,10 +21,8 @@ const (
 )
 
 type Service struct {
-	DB       *sqlx.DB
-	Secret   []byte
-	claimsMu sync.Mutex
-	claims   Claims
+	DB     *sqlx.DB
+	Secret []byte
 }
 
 type Claims struct {
@@ -111,10 +108,12 @@ func (s *Service) Sign(user *domain.User, kind string, ttl time.Duration) (strin
 }
 
 func (s *Service) Parse(token string) (*Claims, error) {
-	s.claimsMu.Lock()
-	defer s.claimsMu.Unlock()
-	s.claims = Claims{}
-	parsed, err := jwt.ParseWithClaims(token, &s.claims, func(t *jwt.Token) (any, error) {
+	// Claims are parsed into a goroutine-local struct so concurrent Parse
+	// calls can never overwrite each other's result. Returning a pointer
+	// into shared state is what previously caused identity cross-over under
+	// load (Alice's /auth/me returning Bob's id/username).
+	claims := &Claims{}
+	parsed, err := jwt.ParseWithClaims(token, claims, func(t *jwt.Token) (any, error) {
 		if t.Method != jwt.SigningMethodHS256 {
 			return nil, domain.Unauthorized("非法令牌算法")
 		}
@@ -123,11 +122,7 @@ func (s *Service) Parse(token string) (*Claims, error) {
 	if err != nil || !parsed.Valid {
 		return nil, domain.Unauthorized("令牌无效或已过期")
 	}
-	c, ok := parsed.Claims.(*Claims)
-	if !ok {
-		return nil, domain.Unauthorized("令牌无效")
-	}
-	return c, nil
+	return claims, nil
 }
 
 func (s *Service) pair(u *domain.User) (*TokenPair, error) {
