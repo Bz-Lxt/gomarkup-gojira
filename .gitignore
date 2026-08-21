@@ -1,0 +1,41 @@
+# Secrets & local env
+.env
+.env.local
+*.pem
+
+# Go
+backend/bin/
+backend/tmp/
+backend/coverage.out
+backend/coverage.html
+*.test
+vendor/
+
+# Node / Vue
+node_modules/
+frontend-user/dist/
+frontend-user/node_modules/
+frontend-admin/dist/
+frontend-mp/dist/
+.vite/
+*.tsbuildinfo
+
+# Playwright
+tests/playwright-report/
+tests/test-results/
+tests/.auth/
+playwright-report/
+test-results/
+
+# IDE / OS
+.DS_Store
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Docker leftovers
+*.log
+
+# SOP lock & docs stay in repo during swarm (deploy phase may ignore docs/)
+# .alkaid-sop and docs/ are NOT ignored until /deploy
