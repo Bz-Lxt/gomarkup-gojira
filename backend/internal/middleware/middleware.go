@@ -77,9 +77,15 @@ func JWT(a *auth.Service) func(http.Handler) http.Handler {
 				platform.WriteError(w, r, domain.Unauthorized("用户不存在或已停用"))
 				return
 			}
+			// Use the role from the database, NOT the JWT claim.  The token
+			// embeds the role at signing time and stays valid until expiry;
+			// if an admin demotes a user (e.g. ADMIN→VIEWER) the old token
+			// would still carry the elevated role.  By trusting the live DB
+			// value, role changes take effect on the very next request,
+			// closing the window where a demoted user retains write access.
 			p := &platform.UserPrincipal{
 				ID: u.ID, Username: u.Username, Email: u.Email,
-				DisplayName: u.DisplayName, Role: c.Role,
+				DisplayName: u.DisplayName, Role: u.Role,
 			}
 			ctx := context.WithValue(r.Context(), platform.CtxUser, p)
 			next.ServeHTTP(w, r.WithContext(ctx))
