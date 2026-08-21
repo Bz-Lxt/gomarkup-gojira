@@ -233,10 +233,8 @@ func (w *Worker) Poll(ctx context.Context) error {
 	if err != nil {
 		return err
 	}
-	eventCtx := ctx
-	var cancel context.CancelFunc
 	for i := range events {
-		eventCtx, cancel = context.WithTimeout(eventCtx, 5*time.Second)
+		eventCtx, cancel := context.WithTimeout(ctx, 5*time.Second)
 		w.deliver(eventCtx, &events[i])
 		cancel()
 	}
