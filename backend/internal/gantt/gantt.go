@@ -85,7 +85,7 @@ func DetectCycle(existing []Edge, from, to int64) (bool, []int64) {
 				return true, reconstruct(parent, from, to)
 			}
 			if seen[v] {
-				return false, nil
+				continue
 			}
 			seen[v] = true
 			parent[v] = u
