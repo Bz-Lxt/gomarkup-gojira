@@ -599,7 +599,7 @@ func (s *Service) dependencyWarnings(ctx context.Context, iss *domain.Issue) ([]
 		WHERE d.successor_id=$1 AND d.dep_type='FS'
 		  AND pred.status NOT IN ('DONE','RESOLVED','CLOSED','REJECTED')`, iss.ID)
 	if err != nil {
-		return nil, false, ctx.Err()
+		return nil, false, err
 	}
 	if len(keys) == 0 {
 		return nil, false, nil
