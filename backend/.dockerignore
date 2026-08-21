@@ -1,0 +1,8 @@
+.git
+.gitignore
+**/*_test.go
+**/*.md
+tmp
+*.out
+coverage.*
+.DS_Store
