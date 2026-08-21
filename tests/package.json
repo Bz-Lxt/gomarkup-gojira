@@ -1,0 +1,10 @@
+{
+  "name": "gojira-e2e",
+  "private": true,
+  "scripts": {
+    "test": "playwright test --config=playwright.config.ts"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.49.1"
+  }
+}
