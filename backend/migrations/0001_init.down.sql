@@ -1,0 +1,15 @@
+DROP TABLE IF EXISTS audit_logs;
+DROP TABLE IF EXISTS notifications;
+DROP TABLE IF EXISTS sprint_daily_snapshots;
+DROP TABLE IF EXISTS trigger_executions;
+DROP TABLE IF EXISTS outbox_events;
+DROP TABLE IF EXISTS triggers;
+DROP TABLE IF EXISTS issue_comments;
+DROP TABLE IF EXISTS issue_status_history;
+DROP TABLE IF EXISTS issue_dependencies;
+DROP TABLE IF EXISTS issue_labels;
+DROP TABLE IF EXISTS issues;
+DROP TABLE IF EXISTS sprints;
+DROP TABLE IF EXISTS project_members;
+DROP TABLE IF EXISTS projects;
+DROP TABLE IF EXISTS users;
