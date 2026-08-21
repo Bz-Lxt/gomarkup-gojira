@@ -215,9 +215,8 @@ func (s *Service) Burndown(w http.ResponseWriter, r *http.Request) {
 	}
 	rows = AttachIdeal(rows)
 	ideal := make([]map[string]any, 0, n)
-	series := make([]map[string]any, 0, n)
-	actual := series[:0]
-	scopes := series[:0]
+	actual := make([]map[string]any, 0, n)
+	scopes := make([]map[string]any, 0)
 	var prevScope float64
 	for i, row := range rows {
 		ideal = append(ideal, map[string]any{"date": row.Day, "value": row.Ideal})
