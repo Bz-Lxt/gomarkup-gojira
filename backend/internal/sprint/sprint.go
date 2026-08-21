@@ -177,7 +177,7 @@ func (s *Service) Close(w http.ResponseWriter, r *http.Request) {
 		} else {
 			target = *dest.MoveToSprint
 		}
-		if _, err := s.DB.Exec(q, target, now, id); err != nil {
+		if _, err := tx.Exec(q, target, now, id); err != nil {
 			platform.WriteError(w, r, domain.Internal(err))
 			return
 		}
